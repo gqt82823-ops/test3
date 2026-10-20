@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090d18">
+  <title>Cloud Retro | 클라우드 게임</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #090d18;
+      color: #f5f7ff;
+      font-family: system-ui, sans-serif;
+    }
+    header {
+      padding: 20px;
+      border-bottom: 1px solid #252d42;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo { font-size: 23px; font-weight: 900; }
+    .logo span { color: #8b7cff; }
+    .status { color: #a8b2c9; font-size: 12px; }
+    main { max-width: 1050px; margin: auto; padding: 25px 16px; }
+    .hero { padding: 20px 0; }
+    h1 { font-size: clamp(28px, 5vw, 45px); margin-bottom: 10px; }
+    .muted { color: #a8b2c9; line-height: 1.7; }
+    .panel {
+      background: #111829;
+      border: 1px solid #29334b;
+      border-radius: 18px;
+      padding: 18px;
+      margin: 20px 0;
+    }
+    .screen {
+      background: #050811;
+      border: 1px solid #29334b;
+      border-radius: 14px;
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    .screen iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #050811;
+    }
+    .placeholder { padding: 20px; }
+    .game-icon { font-size: 55px; }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 13px 18px;
+      font-size: 15px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+    .primary { background: #8170ff; color: white; }
+    .secondary { background: #252f46; color: white; }
+    input {
+      width: 100%;
+      padding: 13px;
+      background: #080d19;
+      color: white;
+      border: 1px solid #35405a;
+      border-radius: 9px;
+      margin-top: 8px;
+    }
+    label { font-size: 14px; color: #cbd3e6; }
+    .notice {
+      padding: 13px;
+      border-radius: 10px;
+      background: #1a2033;
+      color: #bdc8e0;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    footer {
+      text-align: center;
+      color: #8994ad;
+      padding: 25px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">🎮 CLOUD <span>RETRO</span></div>
+    <div class="status">클라우드 게임 센터</div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>나만의 클라우드 게임기</h1>
+      <p class="muted">
+        브라우저에서 접속하고, 원격 서버의 게임을 즐겨 보세요.
+        PC와 모바일 브라우저를 지원합니다.
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>🕹️ 게임 플레이</h2>
+      <div class="screen" id="screen">
+        <div class="placeholder">
+          <div class="game-icon">👾</div>
+          <h3>스트리밍 서버 연결 대기 중</h3>
+          <p class="muted">서버 주소를 설정한 다음 연결 버튼을 누르세요.</p>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button class="secondary" id="fullscreen">전체 화면</button>
+        <button class="secondary" id="openTab">새 탭에서 열기</button>
+      </div>
+      <p class="muted" id="message" aria-live="polite">
+        페이지를 열면 스트리밍 서버에 자동으로 연결을 시도합니다.
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>⚙️ 연결 상태</h2>
+      <p class="muted">
+        사이트 주소: https://gqt82823-ops.github.io/test3/<br>
+        스트리밍 서버 주소는 HTTPS 도메인을 준비한 뒤 코드에 설정해야 합니다.
+      </p>
+      <div class="notice">
+        🔒 보안 안내: 서버의 로그인 화면을 통해 인증하세요.
+        HTTP 주소는 HTTPS 사이트에서 차단될 수 있습니다.
+      </div>
+    </section>
+  </main>
+
+  <footer>CLOUD RETRO · 개인 클라우드 게임 프로젝트</footer>
+
+  <script>
+    // 실제 스트리밍용 HTTPS 주소가 준비되면 아래 값을 바꾸세요.
+    // 예: const STREAM_URL = "https://play.example.com";
+    const STREAM_URL = "";
+
+    const screen = document.getElementById("screen");
+    const message = document.getElementById("message");
+
+    function showPlaceholder(title, detail) {
+      screen.replaceChildren();
+      const box = document.createElement("div");
+      box.className = "placeholder";
+      const icon = document.createElement("div");
+      icon.className = "game-icon";
+      icon.textContent = "🎮";
+      const heading = document.createElement("h3");
+      heading.textContent = title;
+      const text = document.createElement("p");
+      text.className = "muted";
+      text.textContent = detail;
+      box.append(icon, heading, text);
+      screen.appendChild(box);
+    }
+
+    function connectAutomatically() {
+      if (!STREAM_URL) {
+        showPlaceholder(
+          "스트리밍 서버 설정 대기 중",
+          "사이트는 자동 연결 방식으로 설정됐어요. Linode 스트리밍 서버의 HTTPS 주소를 설정하면 자동 연결됩니다."
+        );
+        message.textContent = "서버 주소가 아직 설정되지 않아 연결할 수 없습니다.";
+        return;
+      }
+
+      try {
+        const url = new URL(STREAM_URL);
+        if (url.protocol !== "https:" || url.username || url.password) {
+          throw new Error("안전한 HTTPS 주소만 사용할 수 있습니다.");
+        }
+
+        const frame = document.createElement("iframe");
+        frame.src = url.href;
+        frame.title = "Cloud Retro 스트리밍 데스크톱";
+        frame.allow = "autoplay; fullscreen; gamepad";
+        frame.allowFullscreen = true;
+        screen.replaceChildren(frame);
+        message.textContent = "스트리밍 서버에 자동 연결을 시도하고 있습니다.";
+      } catch (error) {
+        showPlaceholder("서버 주소를 확인해 주세요", error.message);
+        message.textContent = error.message;
+      }
+    }
+
+    document.getElementById("fullscreen").addEventListener("click", () => {
+      const frame = screen.querySelector("iframe");
+      if (frame?.requestFullscreen) {
+        frame.requestFullscreen().catch(() => {
+          message.textContent = "전체 화면을 사용할 수 없습니다. 브라우저 설정을 확인하세요.";
+        });
+      } else {
+        message.textContent = "스트리밍 서버 주소 설정이 완료되면 전체 화면을 사용할 수 있습니다.";
+      }
+    });
+
+    document.getElementById("openTab").addEventListener("click", () => {
+      if (!STREAM_URL) {
+        message.textContent = "먼저 스트리밍 서버의 HTTPS 주소를 설정해야 합니다.";
+        return;
+      }
+      window.open(STREAM_URL, "_blank", "noopener,noreferrer");
+    });
+
+    // 페이지 로드 시 자동 연결
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", connectAutomatically);
+    } else {
+      connectAutomatically();
+    }
+  </script>
+</body>
+</html>
